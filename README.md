@@ -10,6 +10,26 @@ so the two apps look like one family.
 
 ![Kata, the Basics page](testdata/basics.png)
 
+## Where to start
+
+Never studied Japanese? Do not open Words first — the kanji will just look
+like noise. Go in this order:
+
+1. **Read Basics.** Six short cards, five minutes. They explain the three
+   scripts, why there is no word for "is", and how particles work. Everything
+   else assumes these.
+2. **Learn the Kana.** The Kana page teaches hiragana one row at a time with a
+   picture for each. Do the a-row first, then one more row a day. You only
+   need to *read* them, not write them — that is enough to start.
+3. **Study the Words.** Now the words make sense: each shows the Japanese, its
+   reading, the meaning, and a note on how to actually use it.
+4. **Quiz yourself.** Pick Words or Kana, answer four choices, and every answer
+   shows the word again so you learn from mistakes.
+
+Already know hiragana? Skip straight to **Words**, or hit **Quiz** to test
+where you are. Your topic and search carry into the quiz, so you can drill one
+topic at a time.
+
 ## How it teaches
 
 Competitors like Tofugu teach kana first with mnemonics; Tae Kim's guide
