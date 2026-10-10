@@ -1,0 +1,6 @@
+{
+  "name": "Kata",
+  "identifier": "dev.yafit.kata",
+  "version": "0.1.0",
+  "out": "build"
+}
