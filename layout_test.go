@@ -102,3 +102,21 @@ func TestHeaderKeepsTheNameAtMinimum(t *testing.T) {
 		t.Errorf("the wordmark is not shown at the minimum size; texts %q", tt.Texts())
 	}
 }
+
+// TestPathButtonsStayInsideAtMinimum checks the guide's buttons, which sit
+// at the end of a row, stay inside the narrowest window.
+func TestPathButtonsStayInsideAtMinimum(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabBasics
+	tt := ui.NewTester(a.view, minWidth, 900)
+	tt.Frame()
+	for _, label := range []string{"Open Kana", "Open Words", "Open Quiz"} {
+		box, ok := tt.Find(label)
+		if !ok {
+			t.Fatalf("%q is missing at %dx%d", label, minWidth, 900)
+		}
+		if box.X+box.W > minWidth {
+			t.Errorf("%q ends at %.0f, past the %d-wide window", label, box.X+box.W, minWidth)
+		}
+	}
+}

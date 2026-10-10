@@ -28,9 +28,33 @@ func TestBasicsTeachesFirst(t *testing.T) {
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()
 
-	for _, want := range []string{"Start here", "Three scripts, one language", "Particles mark the job of a word"} {
+	for _, want := range []string{"Start here", "Your path", "Three scripts, one language", "Particles mark the job of a word"} {
 		if !tt.HasText(want) {
 			t.Errorf("the basics page is missing %q; texts are %q", want, tt.Texts())
+		}
+	}
+}
+
+// TestPathButtonsJumpToThePage checks the guide's buttons take a confused
+// beginner straight to the page each step names.
+func TestPathButtonsJumpToThePage(t *testing.T) {
+	for _, c := range []struct {
+		button string
+		want   int
+	}{
+		{"Open Kana", TabKana},
+		{"Open Words", TabStudy},
+		{"Open Quiz", TabQuiz},
+	} {
+		a := newTestApp()
+		a.tab = TabBasics
+		tt := ui.NewTester(a.view, 820, 660)
+		tt.Frame()
+		if err := tt.Click(c.button); err != nil {
+			t.Fatalf("no %q button: %v", c.button, err)
+		}
+		if a.tab != c.want {
+			t.Errorf("%q set tab %d, want %d", c.button, a.tab, c.want)
 		}
 	}
 }
