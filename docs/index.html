@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kata — learn Japanese from zero, in Indonesian</title>
+  <meta name="description" content="A small native app that teaches Japanese to Indonesian speakers who have never read a single kana. Concepts first, then words, then the characters, then a quiz.">
+  <meta name="theme-color" content="#f4f6f4">
+  <meta property="og:title" content="Kata — learn Japanese from zero">
+  <meta property="og:description" content="Concepts first, then words, then the kana, then a quiz. Built for someone who has never read a single character.">
+  <meta property="og:image" content="img/basics.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="tokens.css">
+</head>
+<body>
+
+  <!-- Nav · N5 floating pill -->
+  <nav class="nav" aria-label="Primary">
+    <div class="nav__pill">
+      <a class="wordmark" href="#top">Kata</a>
+      <div class="nav__links">
+        <a class="nav__link" href="#path">The path</a>
+        <a class="nav__link" href="#download">Download</a>
+      </div>
+      <a class="btn btn--primary btn--sm" href="#download">Get Kata</a>
+    </div>
+  </nav>
+
+  <main id="top">
+
+    <!-- Hero — Workbench: the product itself opens the page -->
+    <section class="hero wrap">
+      <div class="hero__grid">
+        <div class="hero__copy">
+          <h1 class="hero__title reveal" style="--i:0">
+            Learn Japanese from <span class="kana">ゼロ</span>.
+          </h1>
+          <p class="hero__lede reveal" style="--i:1">
+            Built for someone who has never read a single character. Kata
+            teaches the ideas first, then the words, then the kana — then
+            tests you on what stuck.
+          </p>
+          <div class="hero__cta reveal" style="--i:2">
+            <a class="btn btn--primary" href="#download">Download for Windows</a>
+            <a class="btn btn--ghost" href="#path">See how it teaches</a>
+          </div>
+          <p class="hero__note reveal" style="--i:3">
+            11&nbsp;MB · no installer cruft · no webview · Indonesian interface
+          </p>
+        </div>
+
+        <figure class="shot reveal" style="--i:1">
+          <img src="img/basics.png" width="820" height="660"
+               alt="Kata's Basics page: six numbered cards explaining the three scripts, why there is no word for &quot;is&quot;, politeness, particles, word order and long vowels.">
+        </figure>
+      </div>
+    </section>
+
+    <!-- Section head — S2 hanging, stacked -->
+    <section class="wrap" id="path">
+      <header class="head">
+        <h2>Four steps, in the order a beginner meets them.</h2>
+        <p>
+          Most apps drop you into a word list and hope for the best. Kata
+          doesn't. Open it and you start where you actually are.
+        </p>
+      </header>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step__body">
+            <span class="step__num">STEP 01</span>
+            <h3>Read the six ideas.</h3>
+            <p>
+              The three scripts, why there is no word for “is”, politeness
+              levels, how particles mark a word's job, why the verb comes
+              last. Five minutes, and everything after it makes sense.
+            </p>
+            <span class="example">学生です。 <span>— “(I) am a student”</span></span>
+          </div>
+          <figure class="shot step__shot">
+            <img src="img/basics.png" width="820" height="660" loading="lazy"
+                 alt="The Basics page with its numbered concept cards and example sentences.">
+          </figure>
+        </li>
+
+        <li class="step">
+          <div class="step__body">
+            <span class="step__num">STEP 02</span>
+            <h3>Learn the kana, one row at a time.</h3>
+            <p>
+              All 46 hiragana, in teaching order, each with a picture to
+              remember it by — か is a mosquito, ぬ is smooth bendy noodles.
+              Read-only is enough to start.
+            </p>
+            <span class="example">か <span>— a mosquito, about to bite</span></span>
+          </div>
+          <figure class="shot step__shot">
+            <img src="img/kana.png" width="820" height="660" loading="lazy"
+                 alt="The Kana page: the a-row and ka-row of hiragana, each character with its reading and a mnemonic.">
+          </figure>
+        </li>
+
+        <li class="step">
+          <div class="step__body">
+            <span class="step__num">STEP 03</span>
+            <h3>Study the words — with how to use them.</h3>
+            <p>
+              Every word carries the Japanese, its reading, the meaning, an
+              example, and a note on the real usage: which particle, which
+              politeness, what it does not mean.
+            </p>
+            <span class="example">ありがとう <span>— “terima kasih”, not for your boss</span></span>
+          </div>
+          <figure class="shot step__shot">
+            <img src="img/study.png" width="820" height="660" loading="lazy"
+                 alt="The Words page: each card shows the Japanese, its romaji, the Indonesian meaning, a topic badge, an example sentence and a usage note.">
+          </figure>
+        </li>
+
+        <li class="step">
+          <div class="step__body">
+            <span class="step__num">STEP 04</span>
+            <h3>Quiz yourself. Learn from the misses.</h3>
+            <p>
+              Four choices per question, over words or kana. Every answer
+              reveals the word again with its reading and mnemonic — a wrong
+              answer teaches, it doesn't just score.
+            </p>
+            <span class="example">いい <span>— ii — “bagus”</span></span>
+          </div>
+          <figure class="shot step__shot">
+            <img src="img/quiz.png" width="820" height="660" loading="lazy"
+                 alt="The Quiz page: a Japanese word with four Indonesian choices, a progress bar and a score.">
+          </figure>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Refusals — what it is not -->
+    <section class="wrap">
+      <header class="head">
+        <h2>What it is not.</h2>
+      </header>
+      <dl class="refuse">
+        <div class="refuse__item">
+          <dt>Not a game.</dt>
+          <dd>No streak guilt, no energy bars, no cartoon owl. It respects the few minutes you have.</dd>
+        </div>
+        <div class="refuse__item">
+          <dt>Not online.</dt>
+          <dd>No account, no cloud, no tracking. The whole deck and the whole kana table ship inside the app.</dd>
+        </div>
+        <div class="refuse__item">
+          <dt>Not a browser tab.</dt>
+          <dd>A native window drawn on the GPU — it opens instantly and follows your desktop's light or dark setting.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Closing CTA -->
+    <section class="close wrap" id="download">
+      <div class="close__inner">
+        <h2>Start with the Basics. You'll be reading kana this week.</h2>
+        <a class="btn btn--primary" href="https://github.com/yaffalhakim1/kata/releases/latest">Download for Windows</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer · Ft2 inline single line -->
+  <footer class="foot">
+    <div class="wrap foot__row">
+      <span class="foot__tag">Kata — a native app for learning Japanese from Indonesian.</span>
+      <nav class="foot__links" aria-label="Footer">
+        <a href="https://github.com/yaffalhakim1/kata">Source</a>
+        <a href="https://github.com/yaffalhakim1/kata#where-to-start">Guide</a>
+        <a href="https://github.com/yaffalhakim1/kata/releases/latest">Releases</a>
+      </nav>
+    </div>
+  </footer>
+
+</body>
+</html>
