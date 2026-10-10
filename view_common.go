@@ -6,12 +6,19 @@ import (
 
 // The window's top bar: what the app is, the two pages, and the appearance
 // menu. The pages are a segmented control, so switching is one click.
+//
+// The row wraps: at the smallest window the controls move to a second line
+// rather than the appearance button being clipped at the right edge. The
+// brand group grows, so on a wide window the controls still sit at the
+// trailing edge.
 func (a *app) header(c *ui.Context) {
 	t := c.Theme()
-	ui.Row(c).AlignItems(ui.Center).Gap(14).Padding(pageMargin, 16).Children(func() {
-		ui.Text(c, "Kata").FontSize(20).FontWeight(650).Shrink(0)
-		ui.Text(c, "日本語 ⇄ Indonesia").FontSize(13).TextColor(t.TextMuted).Shrink(0)
-		ui.Spacer(c)
+	ui.Row(c).Wrap().AlignItems(ui.Center).Gap(14).Padding(pageMargin, 16).Children(func() {
+		ui.Row(c).AlignItems(ui.Center).Gap(10).Grow(1).MinWidth(0).Children(func() {
+			ui.Text(c, "Kata").FontSize(20).FontWeight(650).Shrink(0)
+			ui.Text(c, "日本語 ⇄ Indonesia").FontSize(13).TextColor(t.TextMuted).
+				SingleLine().Ellipsis("…").Shrink(1).MinWidth(0)
+		})
 		ui.Segmented(c, &a.tab, "Study", "Quiz").Label("Page")
 		a.appearanceButton(c)
 	})

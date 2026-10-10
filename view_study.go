@@ -12,13 +12,13 @@ func (a *app) studyView(c *ui.Context) {
 	shown := a.studyCards()
 
 	ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-		// The controls, on the window's margin.
+		// The controls, on the window's margin. The search takes the room
+		// the topic leaves, so neither clips at the smallest window.
 		ui.Row(c).AlignItems(ui.Center).Gap(12).Padding(pageMargin, 14).Children(func() {
 			ui.SearchField(c, &a.query).Label("Search words").Placeholder("Search a word…").
-				Bind(&a.searchBox).Width(280)
-			ui.Spacer(c)
+				Bind(&a.searchBox).Grow(1).Shrink(1).MinWidth(0)
 			topics := append([]string{"All"}, topicNames(a.cards)...)
-			ui.Select(c, &a.topic, topics).Label("Topic")
+			ui.Select(c, &a.topic, topics).Label("Topic").Shrink(0)
 		})
 		ui.Divider(c).Background(t.Border)
 

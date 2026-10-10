@@ -12,7 +12,7 @@ import (
 // when the run ends it shows the score and what to do next.
 func (a *app) quizView(c *ui.Context) {
 	ui.Column(c).Grow(1).MinWidth(0).Center().Padding(pageMargin, 20).Children(func() {
-		ui.Column(c).Width(contentMax).MaxWidth(contentMax).Gap(14).Children(func() {
+		ui.Column(c).FillWidth().MaxWidth(contentMax).Gap(14).Children(func() {
 			switch {
 			case a.q == nil:
 				a.quizSetup(c)
