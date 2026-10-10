@@ -8,6 +8,8 @@ Built with [MyGo](https://github.com/egoist/mygo) — pure Go, no cgo, no
 webview. It shares the [ports](https://github.com/yaffalhakim1/ports) brand,
 so the two apps look like one family.
 
+**Landing page:** https://yaffalhakim1.github.io/kata/
+
 ![Kata, the Basics page](testdata/basics.png)
 
 ## Where to start
