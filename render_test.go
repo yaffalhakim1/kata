@@ -12,21 +12,39 @@ import (
 // TestRender writes PNGs of the window, so a change to the interface can be
 // looked at without launching the app.
 func TestRender(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()
 	writePNG(t, "testdata/study.png", tt.Image())
 
-	dark := newTestApp()
+	dark := studyApp()
 	ttd := ui.NewTester(dark.view, 820, 660)
 	ttd.SetDark(true)
 	ttd.Frame()
 	writePNG(t, "testdata/study-dark.png", ttd.Image())
 }
 
+// TestRenderBasics writes the first page a beginner sees.
+func TestRenderBasics(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabBasics
+	tt := ui.NewTester(a.view, 820, 660)
+	tt.Frame()
+	writePNG(t, "testdata/basics.png", tt.Image())
+}
+
+// TestRenderKana writes the kana page.
+func TestRenderKana(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabKana
+	tt := ui.NewTester(a.view, 820, 660)
+	tt.Frame()
+	writePNG(t, "testdata/kana.png", tt.Image())
+}
+
 // TestRenderQuiz writes the quiz setup and a question in progress.
 func TestRenderQuiz(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	a.tab = TabQuiz
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()

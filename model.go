@@ -1,48 +1,26 @@
 package main
 
-import (
-	"math/rand"
-)
+import "math/rand"
 
-// Direction is which way a quiz asks: the Japanese word shown, the
-// Indonesian one to pick, or the other way around.
-type Direction int
-
-const (
-	JapaneseToIndo Direction = iota
-	IndoToJapanese
-)
-
-// Prompt is the side the learner reads.
-func (d Direction) Prompt(c Card) string {
-	if d == IndoToJapanese {
-		return c.Indo
-	}
-	return c.Japanese
+// qa is one question and its answer, ready to be asked. The quiz works on
+// these, so the same engine drives a word quiz and a kana quiz.
+type qa struct {
+	Key    string // stable identity for the question
+	Prompt string // what the learner reads
+	Answer string // the right choice
+	Reveal string // extra line shown after answering, to teach
 }
 
-// Answer is the side the learner must choose.
-func (d Direction) Answer(c Card) string {
-	if d == IndoToJapanese {
-		return c.Japanese
-	}
-	return c.Indo
-}
-
-// Reading is the romaji of a card, shown under a Japanese prompt or answer
-// so a beginner can read it.
-func (d Direction) Reading(c Card) string { return c.Romaji }
-
-// Options is how many choices a question shows, when the deck allows it.
+// optionsPerQuestion is how many choices a question shows, when the pool
+// allows it.
 const optionsPerQuestion = 4
 
-// quiz is one run through a set of cards. It is pure state: the view reads
-// it, and Choose and Next move it forward. Nothing here touches the system,
-// so a whole run can be driven from a test.
+// quiz is one run through a set of questions. It is pure state: the view
+// reads it, and Choose and Next move it forward. Nothing here touches the
+// system, so a whole run can be driven from a test.
 type quiz struct {
-	cards    []Card
-	order    []int // indices into cards, in the run's order
-	dir      Direction
+	items    []qa
+	order    []int // indices into items, in the run's order
 	idx      int
 	score    int
 	chosen   int // the option picked this question, -1 before an answer
@@ -50,12 +28,12 @@ type quiz struct {
 	finished bool
 }
 
-// newQuiz builds a run over cards, shuffled from seed so a run is
+// newQuiz builds a run over items, shuffled from seed so a run is
 // repeatable when the seed is fixed. limit caps the number of questions
-// (0 or more than the deck means every card).
-func newQuiz(cards []Card, dir Direction, limit int, seed int64) *quiz {
-	q := &quiz{cards: cards, dir: dir, chosen: -1}
-	q.order = make([]int, len(cards))
+// (0 or more than the set means every question).
+func newQuiz(items []qa, limit int, seed int64) *quiz {
+	q := &quiz{items: items, chosen: -1}
+	q.order = make([]int, len(items))
 	for i := range q.order {
 		q.order[i] = i
 	}
@@ -68,8 +46,8 @@ func newQuiz(cards []Card, dir Direction, limit int, seed int64) *quiz {
 	return q
 }
 
-// prepare builds the four choices for the question at idx: the right answer
-// plus distinct wrong ones, in a stable order for this question.
+// prepare builds the choices for the question at idx: the right answer plus
+// distinct wrong ones, in a stable order for this question.
 func (q *quiz) prepare() {
 	q.options = nil
 	q.chosen = -1
@@ -79,16 +57,16 @@ func (q *quiz) prepare() {
 	correct := q.order[q.idx]
 	q.options = append(q.options, correct)
 
-	// Wrong answers are other cards whose answer differs from the right
+	// Wrong answers are other items whose answer differs from the right
 	// one, so two options never read the same.
-	answer := q.dir.Answer(q.cards[correct])
-	wrong := make([]int, 0, len(q.cards))
-	for i := range q.cards {
-		if i != correct && q.dir.Answer(q.cards[i]) != answer {
+	answer := q.items[correct].Answer
+	wrong := make([]int, 0, len(q.items))
+	for i := range q.items {
+		if i != correct && q.items[i].Answer != answer {
 			wrong = append(wrong, i)
 		}
 	}
-	rng := rand.New(rand.NewSource(q.seedFor(q.idx)))
+	rng := rand.New(rand.NewSource(seedFor(q.idx)))
 	rng.Shuffle(len(wrong), func(i, j int) { wrong[i], wrong[j] = wrong[j], wrong[i] })
 	want := optionsPerQuestion - 1
 	if want > len(wrong) {
@@ -98,21 +76,21 @@ func (q *quiz) prepare() {
 	rng.Shuffle(len(q.options), func(i, j int) { q.options[i], q.options[j] = q.options[j], q.options[i] })
 }
 
-// seedFor mixes the run's index with the question, so each question's
-// options differ yet stay the same on every rebuild of the frame.
-func (q *quiz) seedFor(i int) int64 { return int64(i)*2654435761 + 12345 }
+// seedFor mixes the question index so each question's options differ yet
+// stay the same on every rebuild of the frame.
+func seedFor(i int) int64 { return int64(i)*2654435761 + 12345 }
 
-// Card is the question being asked now.
-func (q *quiz) Card() Card { return q.cards[q.order[q.idx]] }
+// Current is the question being asked now.
+func (q *quiz) Current() qa { return q.items[q.order[q.idx]] }
 
 // Prompt is what the learner reads.
-func (q *quiz) Prompt() string { return q.dir.Prompt(q.Card()) }
+func (q *quiz) Prompt() string { return q.Current().Prompt }
 
-// Choices returns the options in the order shown.
-func (q *quiz) Choices() []Card {
-	out := make([]Card, len(q.options))
+// Choices returns the option answers in the order shown.
+func (q *quiz) Choices() []string {
+	out := make([]string, len(q.options))
 	for i, oi := range q.options {
-		out[i] = q.cards[oi]
+		out[i] = q.items[oi].Answer
 	}
 	return out
 }
@@ -191,17 +169,64 @@ func (q *quiz) Fraction() float64 {
 // Grade is a one-word verdict on the finished run.
 func (q *quiz) Grade() string {
 	if q.Total() == 0 {
-		return "No cards"
+		return "Belum ada kartu"
 	}
 	ratio := float64(q.score) / float64(q.Total())
 	switch {
 	case ratio == 1:
-		return "Sempurna! (Perfect)"
+		return "Sempurna!"
 	case ratio >= 0.8:
-		return "Bagus! (Great)"
+		return "Bagus sekali!"
 	case ratio >= 0.5:
-		return "Lumayan (Not bad)"
+		return "Lumayan, terus berlatih"
 	default:
-		return "Coba lagi (Try again)"
+		return "Coba lagi, pelan-pelan"
 	}
+}
+
+// Direction is which way a word quiz asks: the Japanese shown, the
+// Indonesian to pick, or the other way around.
+type Direction int
+
+const (
+	JapaneseToIndo Direction = iota
+	IndoToJapanese
+)
+
+// Reading is the romaji of a card, shown under a Japanese prompt or answer
+// so a beginner can read it.
+func (d Direction) Reading(c Card) string { return c.Romaji }
+
+// wordQuestions builds the questions for a word quiz in the chosen
+// direction. The reveal line teaches: it shows both sides and the example.
+func wordQuestions(cards []Card, dir Direction) []qa {
+	out := make([]qa, 0, len(cards))
+	for _, c := range cards {
+		prompt, answer := c.Japanese, c.Indo
+		if dir == IndoToJapanese {
+			prompt, answer = c.Indo, c.Japanese
+		}
+		out = append(out, qa{
+			Key:    c.Japanese + "|" + c.Indo,
+			Prompt: prompt,
+			Answer: answer,
+			Reveal: c.Japanese + "（" + c.Romaji + "）— " + c.Indo,
+		})
+	}
+	return out
+}
+
+// kanaQuestions builds the questions for a kana quiz: the character shown,
+// the reading to pick.
+func kanaQuestions(kana []Kana) []qa {
+	out := make([]qa, 0, len(kana))
+	for _, k := range kana {
+		out = append(out, qa{
+			Key:    k.Char,
+			Prompt: k.Char,
+			Answer: k.Romaji,
+			Reveal: k.Char + " = " + k.Romaji + " · " + k.Mnemonic,
+		})
+	}
+	return out
 }

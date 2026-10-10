@@ -36,8 +36,12 @@ func parseAppearance(s string) Appearance {
 	}
 }
 
-// The pages the window shows, as indices the segmented control sets.
+// The pages the window shows, as indices the segmented control sets. The
+// order is the order a beginner meets them: the ideas, the words, the
+// kana, then the test.
 const (
-	TabStudy = iota
+	TabBasics = iota
+	TabStudy
+	TabKana
 	TabQuiz
 )

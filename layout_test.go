@@ -20,7 +20,7 @@ func TestHeaderStaysInsideAtMinimum(t *testing.T) {
 	a := newTestApp()
 	tt := ui.NewTester(a.view, minWidth, minHeight)
 	tt.Frame()
-	for _, label := range []string{"Study", "Quiz", "Appearance: System"} {
+	for _, label := range []string{"Words", "Kana", "Quiz", "Appearance: System"} {
 		box, ok := tt.Find(label)
 		if !ok {
 			t.Fatalf("%q is missing at %dx%d", label, minWidth, minHeight)
@@ -34,7 +34,7 @@ func TestHeaderStaysInsideAtMinimum(t *testing.T) {
 // TestQuizPanelStaysInsideAtMinimum checks the quiz panel and its choices
 // stay inside the narrowest window.
 func TestQuizPanelStaysInsideAtMinimum(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	a.tab = TabQuiz
 	a.startQuiz()
 	tt := ui.NewTester(a.view, minWidth, minHeight)
@@ -44,7 +44,7 @@ func TestQuizPanelStaysInsideAtMinimum(t *testing.T) {
 		t.Fatal("the quiz question is missing at the minimum size")
 	}
 	for _, label := range a.q.Choices() {
-		box, ok := tt.Find(a.answerText(label))
+		box, ok := tt.Find(label)
 		if !ok {
 			t.Fatalf("the choice %q is missing", label)
 		}
@@ -58,7 +58,7 @@ func TestQuizPanelStaysInsideAtMinimum(t *testing.T) {
 // TestNoHorizontalOverflow checks the widest content, a long example
 // sentence, does not push past the window at its smallest size.
 func TestNoHorizontalOverflow(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	a.query = "benkyou"
 	tt := ui.NewTester(a.view, minWidth, minHeight)
 	tt.Frame()
@@ -69,5 +69,36 @@ func TestNoHorizontalOverflow(t *testing.T) {
 	}
 	if box.X+box.W > minWidth {
 		t.Errorf("the example ends at %.0f, past the %d-wide window", box.X+box.W, minWidth)
+	}
+}
+
+// TestKanaTilesWrapAtMinimum checks the kana row wraps its tiles rather
+// than pushing the last ones off the right edge at the narrowest window.
+func TestKanaTilesWrapAtMinimum(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabKana
+	tt := ui.NewTester(a.view, minWidth, minHeight)
+	tt.Frame()
+
+	// The a-row has five tiles; if they did not wrap, the last (お) would
+	// be past the edge.
+	box, ok := tt.Find("お")
+	if !ok {
+		t.Fatal("the last kana of the a-row is missing at the minimum size")
+	}
+	if box.X+box.W > minWidth {
+		t.Errorf("お ends at %.0f, past the %d-wide window: the row did not wrap",
+			box.X+box.W, minWidth)
+	}
+}
+
+// TestHeaderKeepsTheNameAtMinimum checks the wordmark is not crushed by the
+// other header controls at the narrowest window.
+func TestHeaderKeepsTheNameAtMinimum(t *testing.T) {
+	a := newTestApp()
+	tt := ui.NewTester(a.view, minWidth, minHeight)
+	tt.Frame()
+	if !tt.HasText("Kata") {
+		t.Errorf("the wordmark is not shown at the minimum size; texts %q", tt.Texts())
 	}
 }

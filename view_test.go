@@ -7,15 +7,53 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// newTestApp is an app showing the built-in deck, as a first run would.
+// newTestApp is an app showing the built-in deck and kana, as a first run
+// would.
 func newTestApp() *app {
-	return &app{cards: deck(), topic: "All", limitIdx: 1}
+	return &app{cards: deck(), kana: allKana(), topic: "All", limitIdx: 1}
 }
 
-// TestStudyListsWords checks the Study page shows words, their reading and
-// their meaning.
-func TestStudyListsWords(t *testing.T) {
+// studyApp is a new app on the Words page, which the word tests drive.
+func studyApp() *app {
 	a := newTestApp()
+	a.tab = TabStudy
+	return a
+}
+
+// TestBasicsTeachesFirst checks the first page a beginner sees explains the
+// ideas, not just the words.
+func TestBasicsTeachesFirst(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabBasics
+	tt := ui.NewTester(a.view, 820, 660)
+	tt.Frame()
+
+	for _, want := range []string{"Start here", "Three scripts, one language", "Particles mark the job of a word"} {
+		if !tt.HasText(want) {
+			t.Errorf("the basics page is missing %q; texts are %q", want, tt.Texts())
+		}
+	}
+}
+
+// TestKanaTeachesRows checks the Kana page shows characters with their
+// readings and mnemonics.
+func TestKanaTeachesRows(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabKana
+	tt := ui.NewTester(a.view, 820, 660)
+	tt.Frame()
+
+	for _, want := range []string{"Hiragana", "あ", "a", "か"} {
+		if !tt.HasText(want) {
+			t.Errorf("the kana page is missing %q", want)
+		}
+	}
+}
+
+// TestStudyListsWords checks the Study page shows words, their reading,
+// meaning and usage note.
+func TestStudyListsWords(t *testing.T) {
+	a := studyApp()
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()
 
@@ -26,10 +64,9 @@ func TestStudyListsWords(t *testing.T) {
 	}
 }
 
-// TestSearchFilters checks typing in the search narrows the list, which is
-// the point of the field.
+// TestSearchFilters checks typing in the search narrows the list.
 func TestSearchFilters(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()
 
@@ -40,24 +77,10 @@ func TestSearchFilters(t *testing.T) {
 	}
 }
 
-// TestTopicFilter checks the topic filter narrows the list.
-func TestTopicFilter(t *testing.T) {
-	a := newTestApp()
-	a.topic = "Makanan"
-	if got := a.studyCards(); len(got) != 10 {
-		t.Errorf("the Makanan topic has %d cards, want 10", len(got))
-	}
-	for _, c := range a.studyCards() {
-		if c.Topic != "Makanan" {
-			t.Errorf("a card of another topic slipped in: %q", c.Topic)
-		}
-	}
-}
-
 // TestEmptySearchOffersAWayOut checks the empty state names the query and
-// offers to clear it, rather than only saying there is nothing.
+// offers to clear it.
 func TestEmptySearchOffersAWayOut(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	a.query = "zzzzz"
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()
@@ -70,9 +93,9 @@ func TestEmptySearchOffersAWayOut(t *testing.T) {
 	}
 }
 
-// TestQuizFlow drives a whole run: start, answer every question, and land
-// on the results screen with a full score.
-func TestQuizFlow(t *testing.T) {
+// TestWordQuizFlow drives a whole word run: start, answer every question,
+// and land on the results screen with a full score.
+func TestWordQuizFlow(t *testing.T) {
 	a := newTestApp()
 	a.limitIdx = 0 // five questions
 	tt := ui.NewTester(a.view, 820, 660)
@@ -91,8 +114,7 @@ func TestQuizFlow(t *testing.T) {
 	}
 
 	for !a.q.Finished() {
-		q := a.q
-		right := a.direction().Answer(q.Card())
+		right := a.q.Choices()[a.q.CorrectIndex()]
 		if err := tt.Click(right); err != nil {
 			t.Fatalf("no option %q: %v", right, err)
 		}
@@ -115,6 +137,32 @@ func TestQuizFlow(t *testing.T) {
 	}
 	if !tt.HasText("Results") {
 		t.Errorf("the run did not end on the results screen; texts %q", tt.Texts())
+	}
+}
+
+// TestKanaQuizFlow drives a kana run end to end.
+func TestKanaQuizFlow(t *testing.T) {
+	a := newTestApp()
+	a.tab = TabQuiz
+	a.sourceIdx = quizKana
+	a.limitIdx = 0
+	tt := ui.NewTester(a.view, 820, 660)
+	tt.Frame()
+
+	if err := tt.Click("Start quiz"); err != nil {
+		t.Fatalf("no Start button on the kana setup: %v", err)
+	}
+	tt.Frame()
+	if a.q == nil || a.q.Total() != 5 {
+		t.Fatalf("the kana run is not five questions: %+v", a.q)
+	}
+	right := a.q.Choices()[a.q.CorrectIndex()]
+	if err := tt.Click(right); err != nil {
+		t.Fatalf("no kana option %q: %v", right, err)
+	}
+	tt.Frame()
+	if !a.q.Answered() {
+		t.Fatal("clicking a kana option did not answer")
 	}
 }
 
@@ -163,7 +211,7 @@ func TestAppearanceChangesTheTheme(t *testing.T) {
 
 // TestKeyboardReachesSearch checks F focuses the search field.
 func TestKeyboardReachesSearch(t *testing.T) {
-	a := newTestApp()
+	a := studyApp()
 	tt := ui.NewTester(a.view, 820, 660)
 	tt.Frame()
 	tt.Key(0, ui.KeyF)

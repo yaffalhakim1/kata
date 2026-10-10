@@ -7,9 +7,9 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// quizView is the test-yourself page. Before a run it offers the direction
-// and how many questions; during a run it asks a word and four meanings;
-// when the run ends it shows the score and what to do next.
+// quizView is the test-yourself page. Before a run it offers what to be
+// asked, the direction and how many questions; during a run it asks a
+// prompt and four choices; when the run ends it shows the score.
 func (a *app) quizView(c *ui.Context) {
 	ui.Column(c).Grow(1).MinWidth(0).Center().Padding(pageMargin, 20).Children(func() {
 		ui.Column(c).FillWidth().MaxWidth(contentMax).Gap(14).Children(func() {
@@ -25,25 +25,40 @@ func (a *app) quizView(c *ui.Context) {
 	})
 }
 
-// quizSetup is the screen before a run: the two choices and a start button.
+// quizSetup is the screen before a run: what to be asked, the direction,
+// the length, and a start button.
 func (a *app) quizSetup(c *ui.Context) {
 	t := c.Theme()
 	card(c).Children(func() {
 		ui.Text(c, "Test yourself").FontSize(17).FontWeight(600)
-		hint(c, "Answer a few words, then see how you did.")
+		hint(c, "Answer a few, then see how you did.")
 
-		sectionTitle(c, "Ask me")
-		ui.Segmented(c, &a.dirIdx, "日本語 → Indonesia", "Indonesia → 日本語").Label("Direction")
+		sectionTitle(c, "Ask me about")
+		ui.Segmented(c, &a.sourceIdx, "Words", "Kana").Label("What to be asked")
+
+		if a.sourceIdx == quizWords {
+			sectionTitle(c, "Direction")
+			ui.Segmented(c, &a.dirIdx, "日本語 → Indonesia", "Indonesia → 日本語").Label("Direction")
+		}
 
 		sectionTitle(c, "Questions")
 		ui.Segmented(c, &a.limitIdx, limitLabels()...).Label("How many questions")
 
 		ui.Row(c).AlignItems(ui.Center).Gap(10).Children(func() {
 			ui.PrimaryButton(c, "Start quiz").OnClick(a.startQuiz)
-			ui.Textf(c, "%d words in this set", len(a.studyCards())).
+			ui.Textf(c, "%d in this set", len(a.quizItems())).
 				FontSize(13).TextColor(t.TextMuted)
 		})
 	})
+}
+
+// quizItems is the pool the current setup would draw from, so the setup can
+// say how many there are and the run can be built.
+func (a *app) quizItems() []qa {
+	if a.sourceIdx == quizKana {
+		return kanaQuestions(a.kana)
+	}
+	return wordQuestions(a.studyCards(), a.direction())
 }
 
 // quizQuestion is one question: what to read, and the four choices.
@@ -61,34 +76,32 @@ func (a *app) quizQuestion(c *ui.Context) {
 
 		sectionTitle(c, a.promptLabel())
 		ui.Text(c, q.Prompt()).FontSize(28).FontWeight(650)
-		if a.direction() == JapaneseToIndo {
-			ui.Text(c, q.Card().Romaji).FontSize(14).TextColor(t.TextMuted)
-		}
 
 		choices := q.Choices()
-		for i, ch := range choices {
-			a.optionButton(c, i, a.answerText(ch), q)
+		for i, text := range choices {
+			a.optionButton(c, i, text, q)
 		}
 
 		if q.Answered() {
 			right := q.Chosen() == q.CorrectIndex()
-			feedback(c, right, q.Card())
+			feedback(c, right, q.Current().Reveal)
 			a.nextButton(c, q)
 		}
 	})
 }
 
-// promptLabel names which language is being read, so the question is
+// promptLabel names which side is being read, so the question is
 // unambiguous.
 func (a *app) promptLabel() string {
-	if a.direction() == IndoToJapanese {
+	switch {
+	case a.sourceIdx == quizKana:
+		return "Hiragana"
+	case a.direction() == IndoToJapanese:
 		return "Indonesian"
+	default:
+		return "日本語"
 	}
-	return "日本語"
 }
-
-// answerText is the side of a card the learner must choose.
-func (a *app) answerText(w Card) string { return a.direction().Answer(w) }
 
 // optionButton is one of the four choices. Before an answer it is a plain
 // control; after, the right one is marked green and a wrong pick red, so
@@ -127,20 +140,20 @@ func (a *app) optionButton(c *ui.Context, i int, text string, q *quiz) {
 	})
 }
 
-// feedback says whether the answer was right, and shows the word with its
-// example, so a wrong answer teaches rather than only scores.
-func feedback(c *ui.Context, right bool, w Card) {
+// feedback says whether the answer was right, and shows the word or kana
+// again with its reading and mnemonic, so a wrong answer teaches rather
+// than only scoring.
+func feedback(c *ui.Context, right bool, reveal string) {
 	t := c.Theme()
-	colour, icon, word := t.Success, iconCheck, "Right"
+	colour, icon, word := t.Success, iconCheck, "Benar"
 	if !right {
-		colour, icon, word = t.Danger, iconCross, "Not quite"
+		colour, icon, word = t.Danger, iconCross, "Belum tepat"
 	}
 	ui.Row(c).AlignItems(ui.Center).Gap(8).Children(func() {
 		ui.Icon(c, icon).Size(15, 15).TextColor(colour)
 		ui.Text(c, word).FontSize(14).FontWeight(600).TextColor(colour)
 	})
-	ui.Textf(c, "%s（%s）— %s", w.Japanese, w.Romaji, w.Indo).FontSize(14)
-	ui.Text(c, w.Example).FontSize(13).TextColor(t.TextMuted)
+	ui.Text(c, reveal).FontSize(14).TextColor(t.TextMuted)
 }
 
 // nextButton advances, or finishes, the run.
@@ -172,17 +185,16 @@ func (a *app) quizDone(c *ui.Context) {
 	})
 }
 
-// startQuiz begins a run over the words the Study page currently shows, so
-// the topic and search carry into the quiz.
+// startQuiz begins a run over the current setup's questions.
 func (a *app) startQuiz() {
-	cards := a.studyCards()
-	if len(cards) == 0 {
+	items := a.quizItems()
+	if len(items) == 0 {
 		return
 	}
 	if a.seed == 0 {
 		a.seed = time.Now().UnixNano()
 	}
-	a.q = newQuiz(cards, a.direction(), a.limitCount(), a.seed)
+	a.q = newQuiz(items, a.limitCount(), a.seed)
 }
 
 // quizKeys wires the keyboard: the digits pick an answer, Enter starts the

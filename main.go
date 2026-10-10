@@ -11,6 +11,7 @@ func main() {
 	s := loadSettings()
 	a := &app{
 		cards:      deck(),
+		kana:       allKana(),
 		appearance: parseAppearance(s.Appearance),
 		topic:      s.Topic,
 		limitIdx:   limitIndex(s.Limit),

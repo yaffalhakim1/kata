@@ -53,8 +53,9 @@ func (a *app) topicOrEmpty() string {
 	return a.topic
 }
 
-// wordCard is one word: the Japanese, how it is read, the meaning, and an
-// example.
+// wordCard is one word: the Japanese, how it is read, the meaning, an
+// example, and a note on how the word is actually used — so a beginner
+// learns the concept, not just the gloss.
 func (a *app) wordCard(c *ui.Context, w Card) {
 	t := c.Theme()
 	card(c).MaxWidth(contentMax).Children(func() {
@@ -66,6 +67,12 @@ func (a *app) wordCard(c *ui.Context, w Card) {
 			ui.Badge(c, w.Topic)
 		})
 		ui.Text(c, w.Example).FontSize(13).TextColor(t.TextMuted)
+		if w.Note != "" {
+			ui.Row(c).AlignItems(ui.Start).Gap(6).Children(func() {
+				ui.Icon(c, iconNote).Size(13, 13).TextColor(t.TextMuted).Shrink(0)
+				ui.Text(c, w.Note).FontSize(12).TextColor(t.TextMuted)
+			})
+		}
 	})
 }
 

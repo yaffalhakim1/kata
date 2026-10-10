@@ -1,38 +1,43 @@
 # Kata
 
-A small native app to learn **Japanese → Indonesian** vocabulary: browse the
-words, then quiz yourself on them.
+A small native app to learn **Japanese → Indonesian**, built for someone who
+has never read a single kana. It teaches the ideas first, then the words,
+then the characters, then tests you.
 
 Built with [MyGo](https://github.com/egoist/mygo) — pure Go, no cgo, no
 webview. It shares the [ports](https://github.com/yaffalhakim1/ports) brand,
 so the two apps look like one family.
 
-![Kata, the Study page](testdata/study.png)
+![Kata, the Basics page](testdata/basics.png)
 
-## What it does
+## How it teaches
 
-- **Study** — the words as cards: the Japanese, its romaji reading, the
-  Indonesian meaning, and a short example sentence. Search by any of them,
-  or filter by topic.
-- **Quiz** — pick the direction (日本語 → Indonesia or the reverse), how many
-  questions, and go. Four choices per question, with the right answer and a
-  wrong pick both marked by an icon as well as a colour. Answer with the
-  mouse or the keys `1`–`4`, move on with `Enter`.
-- **Results** — the score and a verdict, then shuffle and try again.
-- **Appearance** — System, Light or Dark, from a one-click menu on the
-  button. The choice is remembered between runs.
-- The topic and search carry from Study into the quiz, so you can drill one
-  topic.
+Competitors like Tofugu teach kana first with mnemonics; Tae Kim's guide
+teaches grammar by concept before vocabulary. Kata does both:
+
+- **Basics** — the six ideas that make everything else click: the three
+  scripts, that there is no word for "is", politeness, particles, why the
+  verb comes last, and long vowels. This is the first page on purpose.
+- **Words** — 48 common words, each with the Japanese, its romaji, the
+  Indonesian meaning, an example sentence, **and a note on how the word is
+  actually used** (which particle, which politeness, what it does not mean).
+  Search and filter by topic.
+- **Kana** — all 46 hiragana, row by row in teaching order, each with a
+  picture mnemonic ("か is a mosquito", "ぬ is smooth bendy noodles"). The
+  a-row comes first because every other row is built from those five vowels.
+- **Quiz** — over words or kana. Pick the direction and length, answer four
+  choices, and every answer reveals the word or character with its reading
+  and mnemonic, so a wrong answer teaches rather than only scoring.
 
 ## Screenshots
 
-| Study | Quiz |
+| Basics | Kana |
 |---|---|
-| ![Study](testdata/study.png) | ![Quiz](testdata/quiz-question.png) |
+| ![Basics](testdata/basics.png) | ![Kana](testdata/kana.png) |
 
-A wrong or right answer is shown with an icon and the word's example:
-
-![A question, answered](testdata/quiz-answered.png)
+| Words | Quiz |
+|---|---|
+| ![Words](testdata/study.png) | ![Quiz](testdata/quiz-question.png) |
 
 ## Install
 
@@ -58,11 +63,15 @@ the interface can be looked at without launching the app.
 
 ```
 main.go            startup and the window
-app.go             the window's state and the two pages
+app.go             the window's state and the pages
+concepts.go        the Basics lessons
 deck.go            the word list and its filters
-model.go           the quiz: questions, choices, scoring
+kana.go            the hiragana table with mnemonics
+model.go           the quiz engine, and the word/kana questions
 view_common.go     the header and shared pieces
-view_study.go      the Study page
+view_basics.go     the Basics page
+view_study.go      the Words page
+view_kana.go       the Kana page
 view_quiz.go       the Quiz page
 palette.go theme.go the brand colour system
 appearance.go      System / Light / Dark

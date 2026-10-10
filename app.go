@@ -15,24 +15,32 @@ type app struct {
 	win *mygo.Window
 
 	cards []Card // the built-in deck, read once
+	kana  []Kana // the built-in kana, read once
 
 	query string // the study search
 	topic string // "" or "All" means every topic
-	tab   int    // TabStudy or TabQuiz
+	tab   int    // TabBasics, TabStudy, TabKana or TabQuiz
 
 	// searchBox is the search field, so the keyboard can reach it.
 	searchBox ui.Handle
 
 	// Quiz setup, kept between runs.
-	dirIdx   int // index into the two directions
-	limitIdx int // index into limitChoices
-	seed     int64
+	sourceIdx int // quizSource: words or kana
+	dirIdx    int // index into the two directions
+	limitIdx  int // index into limitChoices
+	seed      int64
 
 	// q is the run in progress, or nil at the setup screen.
 	q *quiz
 
 	appearance Appearance
 }
+
+// The sources a quiz can draw from.
+const (
+	quizWords = iota
+	quizKana
+)
 
 // The question counts a run offers; 0 means the whole filtered deck.
 var limitChoices = []int{5, 10, 20, 0}
@@ -77,6 +85,10 @@ func (a *app) view(c *ui.Context) {
 		a.header(c)
 		ui.Divider(c).Background(t.Border)
 		switch a.tab {
+		case TabBasics:
+			a.basicsView(c)
+		case TabKana:
+			a.kanaView(c)
 		case TabQuiz:
 			a.quizView(c)
 		default:

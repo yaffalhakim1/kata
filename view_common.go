@@ -14,12 +14,12 @@ import (
 func (a *app) header(c *ui.Context) {
 	t := c.Theme()
 	ui.Row(c).Wrap().AlignItems(ui.Center).Gap(14).Padding(pageMargin, 16).Children(func() {
-		ui.Row(c).AlignItems(ui.Center).Gap(10).Grow(1).MinWidth(0).Children(func() {
+		ui.Row(c).AlignItems(ui.Center).Gap(10).Grow(1).MinWidth(48).Children(func() {
 			ui.Text(c, "Kata").FontSize(20).FontWeight(650).Shrink(0)
 			ui.Text(c, "日本語 ⇄ Indonesia").FontSize(13).TextColor(t.TextMuted).
 				SingleLine().Ellipsis("…").Shrink(1).MinWidth(0)
 		})
-		ui.Segmented(c, &a.tab, "Study", "Quiz").Label("Page")
+		ui.Segmented(c, &a.tab, "Basics", "Words", "Kana", "Quiz").Label("Page")
 		a.appearanceButton(c)
 	})
 }
